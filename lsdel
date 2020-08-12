@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import logging
 import optparse
 import os
@@ -34,7 +35,7 @@ def perror(message, **kwargs):
     msg = "{0}: {1}".format(whoami, message.format(**kwargs))
     logger.debug("Error: %s", msg)
     if should_print:
-        print >>sys.stderr, msg
+        print(msg, file=sys.stderr)
 
 def parse_options():
     parser = optparse.OptionParser(usage="%prog [options] filename ...")
@@ -93,10 +94,10 @@ def main():
             perror(e.message)
             rv = 1
 
-    print libdelete.format_columns(sorted(
+    print(libdelete.format_columns(sorted(
             [libdelete.relpath(
                     libdelete.undeleted_name(x)) for x in deleted_files]),
-                                   options.singlecolumn)
+                                   options.singlecolumn))
     if options.yieldsize:
         total = None
         try:
@@ -109,7 +110,7 @@ def main():
         if total is None:
             perror('Unable to display total size: errors occurred during calculation.')
         else:
-            print "\nTotal space taken up by files: %dKB" % round((float(total) / 1024))
+            print("\nTotal space taken up by files: %dKB" % round((float(total) / 1024)))
     return rv
 
 if __name__ == "__main__":

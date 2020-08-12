@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import logging
 import optparse
 import os
+import six
 import sys
 
 import libdelete
@@ -40,7 +42,7 @@ def ask(question, *args, **kwargs):
     yes = ('y', 'yes')
     prepend = '' if kwargs.get('nowhoami', False) else "{0}: ".format(whoami)
     try:
-        return raw_input("%s%s " % (prepend,
+        return six.moves.input("%s%s " % (prepend,
                                     question % args)).strip().lower() in yes
     except KeyboardInterrupt:
         sys.exit(0)
@@ -54,7 +56,7 @@ def perror(message, **kwargs):
     msg = "{0}: {1}".format(whoami, message.format(**kwargs))
     logger.debug("Error: %s", msg)
     if should_print:
-        print >>sys.stderr, msg
+        print(msg, file=sys.stderr)
 
 def getsize(path):
     size = os.path.getsize(path)
@@ -64,11 +66,11 @@ def expunge(deleted_files, options):
     expunged_size = 0
     errors = 0
     if options.listfiles:
-        print header
-        print libdelete.format_columns(sorted(
+        print(header)
+        print(libdelete.format_columns(sorted(
                 [libdelete.relpath(
-                        libdelete.undeleted_name(x)) for x in deleted_files]))
-        print footer
+                        libdelete.undeleted_name(x)) for x in deleted_files])))
+        print(footer)
         if not options.force and \
                 not ask(confirmation, nowhoami=True):
             logger.debug("User failed to confirm; exiting")
@@ -97,7 +99,7 @@ def expunge(deleted_files, options):
                     # We exit here, not keep going, as the original code did
                     sys.exit(errors)
             if options.verbose:
-                print "{whoami}: {path} {size} {maybe}expunged ({total}KB total)".format(whoami=whoami, path=f, size=size_str, maybe='would be ' if options.noop else '', total=libdelete.to_kb(expunged_size))
+                print("{whoami}: {path} {size} {maybe}expunged ({total}KB total)".format(whoami=whoami, path=f, size=size_str, maybe='would be ' if options.noop else '', total=libdelete.to_kb(expunged_size)))
         if not options.noop:
             if os.path.isdir(f) and not os.path.islink(f):
                 logger.debug("rmdir: %s", f)
@@ -107,7 +109,7 @@ def expunge(deleted_files, options):
                 os.unlink(f)
 
     if options.yieldsize:
-        print "Total expunged: {0}KB".format(libdelete.to_kb(expunged_size))
+        print("Total expunged: {0}KB".format(libdelete.to_kb(expunged_size)))
     return errors
 
 def parse_options():
@@ -157,7 +159,7 @@ def main():
         if (len(sys.argv) == 2) and (sys.argv[1] == '--debug'):
             sys.argv.append('all')
         else:
-            print >>sys.stderr, "purge does not take any arguments or options."
+            print("purge does not take any arguments or options.", file=sys.stderr)
             sys.exit(1)
     (options, args) = parse_options()
     if (whoami == "purge"):

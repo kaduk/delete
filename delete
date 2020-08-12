@@ -1,9 +1,10 @@
 #!/usr/bin/python
-
+from __future__ import print_function
 import logging
 import optparse
 import os
 import shutil
+import six
 import stat
 import sys
 
@@ -37,7 +38,7 @@ def ask(question, *args, **kwargs):
     yes = ('y', 'yes')
     prepend = '' if kwargs.get('nowhoami', False) else "{0}: ".format(whoami)
     try:
-        return raw_input("%s%s " % (prepend,
+        return six.moves.input("%s%s " % (prepend,
                                     question % args)).strip().lower() in yes
     except KeyboardInterrupt:
         sys.exit(0)
@@ -51,7 +52,7 @@ def perror(message, **kwargs):
     msg = "{0}: {1}".format(whoami, message.format(**kwargs))
     logger.debug("Error: %s", msg)
     if should_print:
-        print >>sys.stderr, msg
+        print(msg, file=sys.stderr)
 
 def actually_delete(filename, options):
     """
@@ -67,7 +68,7 @@ def actually_delete(filename, options):
                    filename):
             return False
     if options.noop:
-        print >>sys.stderr, "{0}: {1} would be removed".format(whoami, filename)
+        print("{0}: {1} would be removed".format(whoami, filename), file=sys.stderr)
         return True
     (dirname, basename) = os.path.split(filename)
     newname = os.path.join(dirname, '.#' + basename)
@@ -112,7 +113,7 @@ def delete(filename, options):
                 is_empty = libdelete.empty_directory(filename)
             except OSError as e:
                 # Do we want to only do this if emulating rm?
-                print >>sys.stderr, ": ".join((whoami, e.filename, e.strerror))
+                print(": ".join((whoami, e.filename, e.strerror)), file=sys.stderr)
                 return False
             if is_empty:
                 return actually_delete(filename, options)
@@ -181,7 +182,7 @@ def main():
     for filename in args:
         # Because you know _someone_ will try it
         if len(filename.rstrip('/')) < 1:
-            print >>sys.stderr, "That's not a good idea."
+            print("That's not a good idea.", file=sys.stderr)
             sys.exit(1)
         # Trailing slashes make bad things happen
         if not delete(filename.rstrip('/'), options):

@@ -8,6 +8,7 @@ import glob
 import logging
 import os
 import re
+import six
 import sys
 import stat
 
@@ -30,7 +31,7 @@ def chunks(seq, size):
     """
     Break a sequence up into size chunks
     """
-    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
+    return (seq[pos:pos + size] for pos in six.moves.range(0, len(seq), size))
 
 def format_columns(items, singlecol=False, width=80):
     """

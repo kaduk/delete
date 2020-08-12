@@ -1,9 +1,11 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import logging
 import optparse
 import os
 import shutil
+import six
 import stat
 import sys
 
@@ -35,7 +37,7 @@ def ask(question, *args, **kwargs):
     yes = ('y', 'yes')
     prepend = '' if kwargs.get('nowhoami', False) else "{0}: ".format(whoami)
     try:
-        return raw_input("%s%s " % (prepend,
+        return six.moves.input("%s%s " % (prepend,
                                     question % args)).strip().lower() in yes
     except KeyboardInterrupt:
         sys.exit(0)
@@ -49,7 +51,7 @@ def perror(message, **kwargs):
     msg = "{0}: {1}".format(whoami, message.format(**kwargs))
     logger.debug("Error: %s", msg)
     if should_print:
-        print >>sys.stderr, msg
+        print(msg, file=sys.stderr)
 
 def actually_undelete(filename, options):
     undeleted_name = libdelete.undeleted_name(filename)
@@ -69,10 +71,10 @@ def actually_undelete(filename, options):
         else:
             os.unlink(undeleted_name)
     if options.noop:
-        print >>sys.stderr, "{0}: {1} would be undeleted".format(whoami, filename)
+        print("{0}: {1} would be undeleted".format(whoami, filename), file=sys.stderr)
         return True
     os.rename(filename, undeleted_name)
-    print >>sys.stderr, "{0}: {1} undeleted".format(whoami, filename)
+    print("{0}: {1} undeleted".format(whoami, filename), file=sys.stderr)
     return True
 
 def undelete(filename, options):
@@ -101,11 +103,11 @@ def undelete(filename, options):
 def get_filenames_from_stdin(options):
     errors = 0
     if options.verbose:
-        print "Enter the files to be undeleted, one file per line."
-        print "Hit <RETURN> on a line by itself to exit.\n"
+        print("Enter the files to be undeleted, one file per line.")
+        print("Hit <RETURN> on a line by itself to exit.\n")
     while True:
         try:
-            filename = raw_input("{0}: ".format(whoami))
+            filename = six.moves.input("{0}: ".format(whoami))
         except (EOFError, KeyboardInterrupt):
             sys.exit(errors)
         if len(filename) == 0:
